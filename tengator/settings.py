@@ -25,7 +25,7 @@ SECRET_KEY = '^dw5atbhvb^hlk-=0@_^txf79qax*#7v0nlpc#9htzse8xxt5b'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
     'django_filters',
 
     'aggregator',
@@ -55,10 +56,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'tengator.urls'
 
+TEMPLATE_ROOT = os.path.join(BASE_DIR, 'templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_ROOT],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -141,6 +143,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, '../', 'static')
 
 AUTH_USER_MODEL = 'aggregator.User'
 
@@ -158,6 +161,10 @@ CELERY_TIMEZONE = TIME_ZONE
 REST FRAMEWORK
 """
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'aggregator.authentication.CustomTokenAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [],
     'DEFAULT_PAGINATION_CLASS': 'aggregator.utils.pagination.StandardResultsSetPagination',
     'DEFAULT_PARSER_CLASSES': (

@@ -6,6 +6,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include([
         path('docs/', include_docs_urls(title='Tengator API Documentation', permission_classes=[])),
-        path('aggregator/', include(('aggregator.urls', 'aggregator'), namespace='aggregator')),
+        path('', include(('aggregator.urls', 'aggregator'), namespace='aggregator')),
     ])),
 ]

@@ -11,4 +11,4 @@ class LotFilter(filters.FilterSet):
 
     class Meta:
         model = Lot
-        fields = ['q']
+        fields = ['q', 'region', 'area']
