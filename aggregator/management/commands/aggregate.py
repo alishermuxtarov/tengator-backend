@@ -1,11 +1,11 @@
 from datetime import date, timedelta
-from time import sleep
 
+from django.core.files.base import ContentFile
 from django.core.management import base
 
 from grab import Grab
 
-from aggregator import models
+from aggregator import models, utils
 
 
 class Command(base.BaseCommand):
@@ -20,8 +20,8 @@ class Command(base.BaseCommand):
         e, s = date.today() + timedelta(days=60), date.today()
         e, s = e.strftime('%d.%m.%Y'), s.strftime('%d.%m.%Y')
         return {
-            'https://exarid.uzex.uz/ru/ajax/filter?PageSize=10&Src=AllMarkets&Type=trade&PageIndex=1': 'https://exarid.uzex.uz/ru/trade/lot/{}/',
-            'https://dxarid.uzex.uz/ru/ajax/filter?EndDate={}&PageSize=10&Src=AllMarkets&Type=trade&startdate={}&PageIndex=1'.format(e, s): 'https://dxarid.uzex.uz/ru/trade/lot/{}/',
+            'https://exarid.uzex.uz/ru/ajax/filter?PageSize=100&Src=AllMarkets&Type=trade&PageIndex=1': 'https://exarid.uzex.uz/ru/trade/lot/{}/',
+            'https://dxarid.uzex.uz/ru/ajax/filter?PageSize=100&EndDate={}&Src=AllMarkets&Type=trade&startdate={}&PageIndex=1'.format(e, s): 'https://dxarid.uzex.uz/ru/trade/lot/{}/',
         }
 
     def handle(self, *args, **options):
@@ -60,12 +60,23 @@ class Command(base.BaseCommand):
         cond = '\n'.join(e.text() for e in cond.select('li'))
         desc = self.g.doc.select('//div[@class="full_block content"]/p')
         titles = self.g.doc.select('//h3[@class="min_title"]')
+
         description = ''
         for i, title in enumerate(titles):
             description += '{}\n{}\n\n'.format(title.text(), desc[i].text())
+        files = []
+
+        for f in self.g.doc.select('//a[@class="product_file"]'):
+            url = f.attr('href')
+            ext = url.split('.')[-1].lower()
+            self.g.go(url)
+            filename = '{}.{}'.format(utils.md5_text(url), ext)
+            files.append(ContentFile(self.g.doc.body, filename))
+
         return {
             'conditions': cond,
             'customer_info': info,
             'description': description,
+            'files': files,
             'url': url,
         }

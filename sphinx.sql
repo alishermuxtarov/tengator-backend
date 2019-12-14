@@ -1,4 +1,5 @@
 CREATE TABLE tengator (
-    title field,
+    title       field,
+    files       field,
     description field
 );

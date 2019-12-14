@@ -27,6 +27,16 @@ class Lot(models.Model):
         verbose_name_plural = 'Лоты'
 
 
+class LotFile(models.Model):
+    lot = models.ForeignKey(Lot, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(upload_to='files')
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Файл'
+        verbose_name_plural = 'Файлы'
+
+
 class User(AbstractUser):
     uid = models.CharField(max_length=30, unique=True)
 
@@ -53,6 +63,7 @@ class SearchWord(models.Model):
 class FtsTengator(models.Model):
     id = models.IntegerField(primary_key=True)
     title = models.TextField(default='')
+    files = models.TextField(default='')
     description = models.TextField(default='')
 
     objects = managers.FTSManager()

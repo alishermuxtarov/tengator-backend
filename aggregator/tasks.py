@@ -1,5 +1,31 @@
 from tengator.celery import app as celery_app
 from django.conf import settings
+from aggregator import utils
+
+
+@celery_app.task()
+def lot_post_save(pk):
+    from aggregator import models
+
+    instance = models.Lot.objects.get(pk=pk)
+
+    print('Создано {}'.format(instance.bid_id))
+    text = ''
+    for f in instance.files.all():
+        text += utils.get_text_from_file(f.file.path)
+        print("читаем файл {}".format(f.file.path))
+    print(text)
+
+    models.FtsTengator.objects.update_record(
+        id=instance.pk,
+        title=instance.title,
+        description=instance.description,
+        files=text
+    )
+    if settings.DEBUG is True:
+        search_words(instance.pk)
+    else:
+        search_words.delay(instance.pk)
 
 
 @celery_app.task()
@@ -19,7 +45,6 @@ def search_words(lot_id):
 
 @celery_app.task()
 def telegram_notifications(word, url, uid):
-    from django.conf import settings
     import telebot
 
     bot = telebot.TeleBot(token=settings.TOKEN)

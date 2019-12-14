@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db.backends.mysql.features import DatabaseFeatures
 from django.db.backends.mysql.validation import DatabaseValidation
 from django.db import models, OperationalError
+from django.conf import settings
 
 def check(*args, **kwargs):
     return []
@@ -87,7 +88,22 @@ class AggregatorManager(models.Manager):
         return self.model.objects.filter(bid_id=bid_id).exists()
 
     def bid_create(self, **kwargs):
+        from aggregator.tasks import lot_post_save
+
         kwargs['bid_date'] = datetime.strptime(
             kwargs['bid_date'], '%d.%m.%Y %H:%M:%S')
         kwargs['start_price'] = kwargs['start_price'][:-3].replace(' ', '')
-        return self.model.objects.create(**kwargs)
+        files = kwargs.pop('files', None) or []
+
+        obj = self.model.objects.create(**kwargs)
+        for f in files:
+            ff = obj.files.create()
+            ff.file = f
+            ff.save()
+
+        if settings.DEBUG is True:
+            lot_post_save(obj.pk)
+        else:
+            lot_post_save.delay(obj.pk)
+
+        return obj
