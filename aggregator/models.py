@@ -11,19 +11,51 @@ from aggregator import managers
 class Region(models.Model):
     title = models.TextField('Регион')
 
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Регион'
+        verbose_name_plural = 'Регионы'
+
 
 class Area(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
     title = models.TextField('Район')
 
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Район'
+        verbose_name_plural = 'Районы'
+
 
 class Category(models.Model):
     title = models.TextField('Категория')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
 class SubCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     title = models.TextField('Список товаров')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Список товаров'
+        verbose_name_plural = 'Список товаров'
 
 
 class Lot(models.Model):

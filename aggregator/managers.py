@@ -87,15 +87,27 @@ class AggregatorManager(models.Manager):
     def bid_exists(self, bid_id):
         return self.model.objects.filter(bid_id=bid_id).exists()
 
-    def bid_create(self, **kwargs):
+    def bid_create(self, sub_ref, **kwargs):
         from aggregator.tasks import lot_post_save
+        from aggregator.models import SubCategory
 
         kwargs['bid_date'] = datetime.strptime(
             kwargs['bid_date'], '%d.%m.%Y %H:%M:%S')
         kwargs['start_price'] = kwargs['start_price'][:-3].replace(' ', '')
         files = kwargs.pop('files', None) or []
+        subcategories = kwargs.pop('subcategories', [])
 
         obj = self.model.objects.create(**kwargs)
+
+        for s in subcategories:
+            if s not in sub_ref:
+                # c, _ = Category.objects.get_or_create(title=category)
+                so = SubCategory.objects.create(
+                    title=s, category_id=kwargs['category_id'])
+                sub_ref[so.title] = so.pk
+            obj.sub_category.add(sub_ref[s])
+        obj.save()
+
         for f in files:
             ff = obj.files.create()
             ff.file = f

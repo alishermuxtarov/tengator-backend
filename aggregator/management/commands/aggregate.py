@@ -17,19 +17,25 @@ class Command(base.BaseCommand):
         self.url = None
         self.region = {}
         self.area = {}
+        self.category = {}
+        self.subcategory = {}
 
     def load_area_and_region(self):
         for obj in models.Region.objects.all():
             self.region[obj.title] = obj.pk
         for obj in models.Area.objects.all():
             self.area[obj.title] = obj.pk
+        for obj in models.Category.objects.all():
+            self.category[obj.title] = obj.pk
+        for obj in models.SubCategory.objects.all():
+            self.subcategory[obj.title] = obj.pk
 
     def get_sites(self):
         e, s = date.today() + timedelta(days=60), date.today()
         e, s = e.strftime('%d.%m.%Y'), s.strftime('%d.%m.%Y')
         return {
-            'https://exarid.uzex.uz/ru/ajax/filter?PageSize=100&Src=AllMarkets&Type=trade&PageIndex=1': 'https://exarid.uzex.uz/ru/trade/lot/{}/',
-            'https://dxarid.uzex.uz/ru/ajax/filter?PageSize=100&EndDate={}&Src=AllMarkets&Type=trade&startdate={}&PageIndex=1'.format(e, s): 'https://dxarid.uzex.uz/ru/trade/lot/{}/',
+            'https://exarid.uzex.uz/ru/ajax/filter?PageSize=1000&Src=AllMarkets&Type=trade&PageIndex=1': 'https://exarid.uzex.uz/ru/trade/lot/{}/',
+            'https://dxarid.uzex.uz/ru/ajax/filter?PageSize=1000&EndDate={}&Src=AllMarkets&Type=trade&startdate={}&PageIndex=1'.format(e, s): 'https://dxarid.uzex.uz/ru/trade/lot/{}/',
         }
 
     def handle(self, *args, **options):
@@ -59,17 +65,19 @@ class Command(base.BaseCommand):
             data.update(self.get_bid_info(bpk))
             data['region_id'] = self.region[data['region_id']]
             data['area_id'] = self.area[data['area_id']]
-            models.Lot.objects.bid_create(**data)
+            data['subcategories'] = [t.strip() for t in data['title'].split(',')]
+            models.Lot.objects.bid_create(self.subcategory, **data)
 
     def get_bid_info(self, bid_id):
-        url = self.url.format(bid_id)
-        self.g.go(url)
+        lot_url = self.url.format(bid_id)
+        self.g.go(lot_url)
         info = self.g.doc.select('//ul[@class="product_info"]')
         info = '\n'.join(e.text() for e in info.select('li'))
         cond = self.g.doc.select('//ul[@class="conditionsList"]')
         cond = '\n'.join(e.text() for e in cond.select('li'))
         desc = self.g.doc.select('//div[@class="full_block content"]/p')
         titles = self.g.doc.select('//h3[@class="min_title"]')
+        cat = self.g.doc.select('//h1[@class="form_title"]/strong').text()
 
         description = ''
         for i, title in enumerate(titles):
@@ -84,9 +92,10 @@ class Command(base.BaseCommand):
             files.append(ContentFile(self.g.doc.body, filename))
 
         return {
+            'category_id': self.category[cat],
             'conditions': cond,
             'customer_info': info,
             'description': description,
             'files': files,
-            'url': url,
+            'url': lot_url,
         }
