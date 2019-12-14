@@ -9,7 +9,7 @@ from aggregator import models, utils
 
 
 class Command(base.BaseCommand):
-    LOT_STRUCT = ['bid_date', 'bid_id', 'region_id', 'area_id', 'title', 'start_price']
+    LOT_STRUCT = ['bid_date', 'bid_id', 'region_id', 'area_id', 'title', 'start_price', 'has_request']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -53,13 +53,14 @@ class Command(base.BaseCommand):
 
         for el in bids[1:]:
             self.save_bid(
-                [e.text() for e in el.select('td')[1:7]]
+                [e.text() for e in el.select('td')[1:8]]
             )
 
     def save_bid(self, bid):
         if '.' in bid[1]:
             bid[0], bid[1] = bid[1], bid[0]
         data = dict(zip(self.LOT_STRUCT, bid))
+        data['has_request'] = data['has_request'] != 'Пока не подана'
         bpk = data['bid_id']
         if not models.Lot.objects.bid_exists(bpk):
             data.update(self.get_bid_info(bpk))
@@ -67,17 +68,19 @@ class Command(base.BaseCommand):
             data['area_id'] = self.area[data['area_id']]
             data['subcategories'] = [t.strip() for t in data['title'].split(',')]
             models.Lot.objects.bid_create(self.subcategory, **data)
+        elif data['has_request'] is True:
+            models.Lot.objects.bid_update_requests(bpk, data['has_request'])
 
     def get_bid_info(self, bid_id):
         lot_url = self.url.format(bid_id)
         self.g.go(lot_url)
         info = self.g.doc.select('//ul[@class="product_info"]')
-        info = '\n'.join(e.text() for e in info.select('li'))
+        info = '\n'.join(e.text().strip() for e in info.select('li'))
         cond = self.g.doc.select('//ul[@class="conditionsList"]')
-        cond = '\n'.join(e.text() for e in cond.select('li'))
+        cond = '\n'.join(e.text().strip() for e in cond.select('li'))
         desc = self.g.doc.select('//div[@class="full_block content"]/p')
         titles = self.g.doc.select('//h3[@class="min_title"]')
-        cat = self.g.doc.select('//h1[@class="form_title"]/strong').text()
+        cat = self.g.doc.select('//h1[@class="form_title"]/strong').text().strip()
 
         description = ''
         for i, title in enumerate(titles):
@@ -90,6 +93,10 @@ class Command(base.BaseCommand):
             self.g.go(url)
             filename = '{}.{}'.format(utils.md5_text(url), ext)
             files.append(ContentFile(self.g.doc.body, filename))
+
+        if cat not in self.category:
+            co = models.Category.objects.create(title=cat)
+            self.category[cat] = co.pk
 
         return {
             'category_id': self.category[cat],

@@ -71,6 +71,7 @@ class Lot(models.Model):
     url = models.URLField('Источник', unique=True, max_length=150)
     category = models.ForeignKey(Category, null=True, verbose_name='Категория', on_delete=models.CASCADE)
     sub_category = models.ManyToManyField(SubCategory, blank=True, verbose_name='Список товаров')
+    has_request = models.BooleanField('Наличие заявок', default=False)
 
     objects = managers.AggregatorManager()
 
@@ -86,6 +87,7 @@ class Lot(models.Model):
 class LotFile(models.Model):
     lot = models.ForeignKey(Lot, on_delete=models.CASCADE, related_name='files')
     file = models.FileField(upload_to='files')
+    # todo: add TEXT Version
 
     class Meta:
         ordering = ['-id']

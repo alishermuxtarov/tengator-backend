@@ -87,6 +87,9 @@ class AggregatorManager(models.Manager):
     def bid_exists(self, bid_id):
         return self.model.objects.filter(bid_id=bid_id).exists()
 
+    def bid_update_requests(self, bid_id, has_request):
+        return self.model.objects.filter(bid_id=bid_id).update(has_request=has_request)
+
     def bid_create(self, sub_ref, **kwargs):
         from aggregator.tasks import lot_post_save
         from aggregator.models import SubCategory

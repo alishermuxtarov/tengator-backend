@@ -5,18 +5,13 @@ from aggregator import utils
 
 @celery_app.task()
 def lot_post_save(pk):
-    # todo: fix me
-    return
     from aggregator import models
 
     instance = models.Lot.objects.get(pk=pk)
 
-    print('Создано {}'.format(instance.bid_id))
     text = ''
     for f in instance.files.all():
         text += utils.get_text_from_file(f.file.path)
-        print("читаем файл {}".format(f.file.path))
-    print(text)
 
     models.FtsTengator.objects.update_record(
         id=instance.pk,
@@ -24,6 +19,9 @@ def lot_post_save(pk):
         description=instance.description,
         files=text
     )
+
+    # todo: fix me
+    return
     if settings.DEBUG is True:
         search_words(instance.pk)
     else:
