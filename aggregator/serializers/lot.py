@@ -8,13 +8,15 @@ class LotListSerializer(serializers.ModelSerializer):
         data = super().to_representation(lot)
         data['region'] = lot.region.title
         data['area'] = lot.area.title
+        data['category'] = lot.category.title
+        data['sub_category'] = ', '.join([sub_category.title for sub_category in lot.sub_category.all()])
         return data
 
     class Meta:
         model = Lot
         fields = [
-            'id', 'bid_date', 'bid_id', 'region', 'area', 'title', 'start_price', 'conditions', 'customer_info',
-            'description', 'url'
+            'id', 'bid_date', 'bid_id', 'region', 'area', 'category', 'sub_category', 'title', 'start_price',
+            'conditions', 'customer_info', 'description', 'url', 'has_request'
         ]
 
 
