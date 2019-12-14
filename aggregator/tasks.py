@@ -5,6 +5,8 @@ from aggregator import utils
 
 @celery_app.task()
 def lot_post_save(pk):
+    # todo: fix me
+    return
     from aggregator import models
 
     instance = models.Lot.objects.get(pk=pk)

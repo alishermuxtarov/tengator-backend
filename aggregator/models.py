@@ -4,17 +4,37 @@ from django.db import models
 from aggregator import managers
 
 
+class Region(models.Model):
+    title = models.TextField('Регион')
+
+
+class Area(models.Model):
+    region = models.ForeignKey(Region, on_delete=models.CASCADE)
+    title = models.TextField('Район')
+
+
+class Category(models.Model):
+    title = models.TextField('Категория')
+
+
+class SubCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    title = models.TextField('Список товаров')
+
+
 class Lot(models.Model):
     bid_date = models.DateTimeField('Срок окончания торгов')
     bid_id = models.PositiveIntegerField('Номер лота')
-    region = models.CharField('Регион', max_length=150)
-    area = models.CharField('Район', max_length=150)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, verbose_name='Регион')
+    area = models.ForeignKey(Area, on_delete=models.CASCADE, verbose_name='Район')
     title = models.TextField('Наименование заказа')
     start_price = models.FloatField('Стартовая стоимость')
     conditions = models.TextField('Условия')
     customer_info = models.TextField('Информация о заказчике')
     description = models.TextField('Описание')
     url = models.URLField('Источник', unique=True)
+    category = models.ForeignKey(Category, null=True, verbose_name='Категория', on_delete=models.CASCADE)
+    sub_category = models.ManyToManyField(SubCategory, blank=True, verbose_name='Список товаров')
 
     objects = managers.AggregatorManager()
 

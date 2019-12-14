@@ -9,12 +9,20 @@ from aggregator import models, utils
 
 
 class Command(base.BaseCommand):
-    LOT_STRUCT = ['bid_date', 'bid_id', 'region', 'area', 'title', 'start_price']
+    LOT_STRUCT = ['bid_date', 'bid_id', 'region_id', 'area_id', 'title', 'start_price']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.g = None
         self.url = None
+        self.region = {}
+        self.area = {}
+
+    def load_area_and_region(self):
+        for obj in models.Region.objects.all():
+            self.region[obj.title] = obj.pk
+        for obj in models.Area.objects.all():
+            self.area[obj.title] = obj.pk
 
     def get_sites(self):
         e, s = date.today() + timedelta(days=60), date.today()
@@ -25,6 +33,7 @@ class Command(base.BaseCommand):
         }
 
     def handle(self, *args, **options):
+        self.load_area_and_region()
         for url, self.url in self.get_sites().items():
             self.g = Grab()
             self.g.go(url)
@@ -32,7 +41,6 @@ class Command(base.BaseCommand):
 
     def parse_bids(self):
         bids = self.g.doc.select('//tr')
-        # print(self.g.doc.body)
         if bids.count() < 1:
             print('Лоты не найдены!')
             return
@@ -49,6 +57,8 @@ class Command(base.BaseCommand):
         bpk = data['bid_id']
         if not models.Lot.objects.bid_exists(bpk):
             data.update(self.get_bid_info(bpk))
+            data['region_id'] = self.region[data['region_id']]
+            data['area_id'] = self.area[data['area_id']]
             models.Lot.objects.bid_create(**data)
 
     def get_bid_info(self, bid_id):
