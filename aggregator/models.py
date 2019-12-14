@@ -48,3 +48,15 @@ class SearchWord(models.Model):
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
+
+
+class FtsTengator(models.Model):
+    id = models.IntegerField(primary_key=True)
+    title = models.TextField(default='')
+    description = models.TextField(default='')
+
+    objects = managers.FTSManager()
+
+    class Meta:
+        managed = False
+        db_table = 'tengator'

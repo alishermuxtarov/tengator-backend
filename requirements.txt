@@ -3,3 +3,4 @@ Pillow==6.2.1
 grab==0.6.41
 pyTelegramBotAPI==3.6.6
 celery[redis]==4.3.0
+mysqlclient==1.4.4

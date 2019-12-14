@@ -1,5 +1,82 @@
 from datetime import datetime
-from django.db import models
+
+from django.db.backends.mysql.features import DatabaseFeatures
+from django.db.backends.mysql.validation import DatabaseValidation
+from django.db import models, OperationalError
+
+def check(*args, **kwargs):
+    return []
+
+
+setattr(DatabaseFeatures, 'is_sql_auto_is_null_enabled', None)
+DatabaseValidation.check = check
+
+
+class FTSManager(models.Manager):
+    def get_queryset(self):
+        try:
+            qs = super().get_queryset()
+            qs = qs.using('fts')
+            return qs
+        except OperationalError:
+            pass
+
+    @staticmethod
+    def clean_kwargs(kwargs):
+        new_kwargs = kwargs.copy()
+        for k, v in kwargs.items():
+            if v is None:
+                new_kwargs.pop(k)
+        return new_kwargs
+
+    def create_record(self, **kwargs):
+        try:
+            self.create(**self.clean_kwargs(kwargs))
+        except OperationalError:
+            pass
+
+    def update_record(self, **kwargs):
+        try:
+            self.delete_record(kwargs.get('id'))
+            self.create_record(**kwargs)
+        except OperationalError:
+            pass
+
+    def search(self, word, pk=None):
+        try:
+            sql = "SELECT id FROM {} WHERE MATCH('{}')".format(
+                self.model._meta.db_table, word)
+            if pk is not None:
+                sql += ' AND id = {}'.format(pk)
+            sql += ';'
+            qs = self.raw(sql, using='fts')
+            return [i.pk for i in qs]
+        except OperationalError:
+            return []
+
+    def delete_record(self, pk):
+        from django.db import connections
+
+        try:
+            with connections['fts'].cursor() as cursor:
+                sql = "DELETE FROM `{}` WHERE `id` = {}".format(
+                    self.model._meta.db_table, pk)
+                cursor.execute(sql)
+                return cursor.fetchone()
+        except OperationalError:
+            pass
+
+    def get_record_by_id(self, pk):
+        from django.db import connections
+
+        try:
+            with connections['fts'].cursor() as cursor:
+                sql = "SELECT id FROM `{}` WHERE `id` = {}".format(
+                    self.model._meta.db_table, pk)
+                cursor.execute(sql)
+                return cursor.fetchone()
+        except OperationalError:
+            pass
 
 
 class AggregatorManager(models.Manager):
