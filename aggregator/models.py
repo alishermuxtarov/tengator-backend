@@ -6,13 +6,15 @@ from aggregator import managers
 
 class Lot(models.Model):
     bid_date = models.DateTimeField('Срок окончания торгов')
-    bid_id = models.PositiveIntegerField('Номер лота', unique=True)
+    bid_id = models.PositiveIntegerField('Номер лота')
     region = models.CharField('Регион', max_length=150)
     area = models.CharField('Район', max_length=150)
     title = models.TextField('Наименование заказа')
     start_price = models.FloatField('Стартовая стоимость')
     conditions = models.TextField('Условия')
     customer_info = models.TextField('Информация о заказчике')
+    description = models.TextField('Описание')
+    url = models.URLField('Источник', unique=True)
 
     objects = managers.AggregatorManager()
 
