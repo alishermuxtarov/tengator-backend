@@ -21,7 +21,7 @@ class Region(models.Model):
 
 
 class Area(models.Model):
-    region = models.ForeignKey(Region, on_delete=models.CASCADE)
+    region = models.ForeignKey(Region, related_name='areas', on_delete=models.CASCADE)
     title = models.TextField('Район')
 
     def __str__(self):
@@ -46,7 +46,7 @@ class Category(models.Model):
 
 
 class SubCategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name='sub_categories', on_delete=models.CASCADE)
     title = models.TextField('Список товаров')
 
     def __str__(self):
