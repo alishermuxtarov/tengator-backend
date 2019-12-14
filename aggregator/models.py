@@ -36,3 +36,13 @@ class User(AbstractUser):
         if not self.username:
             self.username = self.uid
         super().save(*args, **kwargs)
+
+
+class SearchWord(models.Model):
+    user = models.ForeignKey(
+        'aggregator.User', on_delete=models.CASCADE, verbose_name='Пользователь')
+    word = models.CharField('Поисковое слово', max_length=255)
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
