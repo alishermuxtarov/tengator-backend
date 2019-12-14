@@ -1,4 +1,6 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+
 from aggregator import managers
 
 
@@ -21,3 +23,16 @@ class Lot(models.Model):
         ordering = ['-id']
         verbose_name = 'Лот'
         verbose_name_plural = 'Лоты'
+
+
+class User(AbstractUser):
+    uid = models.CharField(max_length=30, unique=True)
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+
+    def save(self, *args, **kwargs):
+        if not self.username:
+            self.username = self.uid
+        super().save(*args, **kwargs)

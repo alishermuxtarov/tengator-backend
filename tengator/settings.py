@@ -121,6 +121,8 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
+AUTH_USER_MODEL = 'aggregator.User'
+
 
 try:
     from .local_settings import *
