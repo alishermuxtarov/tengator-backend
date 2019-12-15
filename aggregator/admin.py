@@ -19,6 +19,19 @@ class LotAdmin(admin.ModelAdmin):
     search_fields = ['word']
 
 
+@admin.register(models.Category)
+class LotAdmin(admin.ModelAdmin):
+    list_display = ['title', 'id']
+    search_fields = ['title']
+
+
+@admin.register(models.SubCategory)
+class LotAdmin(admin.ModelAdmin):
+    list_display = ['title', 'category', 'id']
+    search_fields = ['title']
+    list_filter = ['category']
+
+
 @admin.register(User)
 class SimpleUserAdmin(UserAdmin):
     fieldsets = (
