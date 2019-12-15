@@ -4,9 +4,9 @@ from aggregator.models import Lot
 
 class Command(base.BaseCommand):
     def handle(self, *args, **options):
-        ids = [1092, 273]
+        ids = [1227541, 5098766]
         for pk in ids:
-            lot = Lot.objects.filter(pk=pk)
+            lot = Lot.objects.filter(bid_id=pk)
             if lot.exists():
                 lot.delete()
         call_command('aggregate')
