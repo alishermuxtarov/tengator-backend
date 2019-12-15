@@ -22,7 +22,9 @@ class LotFilter(filters.FilterSet):
         ).order_by('order')
 
     def filter_hot_lots(self, qs, name, q):
-        return qs.filter(has_request=False, bid_date__lte=datetime.now() + timedelta(days=2))
+        return qs.filter(
+            has_request=False, bid_date__lte=datetime.now() + timedelta(days=2)
+        ).filter(bid_date__gte=datetime.now())
 
     class Meta:
         model = Lot
