@@ -89,6 +89,9 @@ class LotFile(models.Model):
     file = models.FileField(upload_to='files')
     # todo: add TEXT Version
 
+    def __str__(self):
+        return self.file.name
+
     class Meta:
         ordering = ['-id']
         verbose_name = 'Файл'
