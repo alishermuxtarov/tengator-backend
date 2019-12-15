@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 ('conditions', models.TextField(verbose_name='Условия')),
                 ('customer_info', models.TextField(verbose_name='Информация о заказчике')),
                 ('description', models.TextField(verbose_name='Описание')),
-                ('url', models.URLField(unique=True, verbose_name='Источник')),
+                ('url', models.URLField(max_length=150, unique=True, verbose_name='Источник')),
             ],
             options={
                 'verbose_name': 'Лот',
