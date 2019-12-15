@@ -183,6 +183,7 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+SEND_CONFIRMATION_SMS = False
 
 try:
     from .local_settings import *

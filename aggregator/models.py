@@ -1,11 +1,16 @@
 import binascii
 import os
+import random
+from datetime import datetime, timedelta
 
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from aggregator import managers
+from aggregator.querysets.confirmation import ConfirmationQuerySet
+from aggregator.utils import BaseModel
+from tengator.settings import SEND_CONFIRMATION_SMS
 
 
 class Region(models.Model):
@@ -127,6 +132,43 @@ class Token(models.Model):
     class Meta:
         verbose_name = _("Токен")
         verbose_name_plural = _("Токены")
+
+
+class ConfirmationCode(BaseModel):
+    AUTHENTICATION = 'authentication'
+    CHANGE_PHONE = 'change_phone'
+
+    TYPES = (
+        (AUTHENTICATION, _('Авторизация')),
+        (CHANGE_PHONE, _('Смена телефона'))
+    )
+
+    type = models.CharField(max_length=255, choices=TYPES, default=AUTHENTICATION)
+    phone = models.CharField(max_length=20, verbose_name=_('Номер телефона'))
+    user = models.ForeignKey(User, models.CASCADE, verbose_name=_('Пользователь'))
+    code = models.CharField(max_length=20, verbose_name=_('Код подтверждения'))
+    is_used = models.BooleanField(default=False, verbose_name=_('Был использован?'))
+    expires_at = models.DateTimeField(verbose_name=_('Срок действия'))
+
+    objects = ConfirmationQuerySet.as_manager()
+
+    def save(self, *args, **kwargs):
+        self.code = str(random.randint(1000, 9999)) if SEND_CONFIRMATION_SMS else "0000"
+        self.expires_at = datetime.now() + timedelta(hours=2)
+        return super().save(*args, **kwargs)
+
+    def send(self):
+        if SEND_CONFIRMATION_SMS:
+            pass
+
+    def __str__(self):
+        return str(self.code) or 'n/a'
+
+    class Meta:
+        get_latest_by = 'id'
+        db_table = 'authentication_confirmation_codes'
+        verbose_name = _('Код подтверждения')
+        verbose_name_plural = _('Коды подтверждения')
 
 
 class SearchWord(models.Model):
