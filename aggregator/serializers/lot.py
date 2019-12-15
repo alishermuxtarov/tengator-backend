@@ -59,6 +59,7 @@ class SuggestionSerializer(serializers.Serializer):
 
 class CategoryReportSerializer(serializers.ModelSerializer):
     total_price = serializers.IntegerField()
+    total_count = serializers.IntegerField()
     price0 = serializers.IntegerField()
     price1 = serializers.IntegerField()
     price2 = serializers.IntegerField()
