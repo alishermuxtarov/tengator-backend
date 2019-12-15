@@ -70,4 +70,4 @@ class CategoryReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id', 'title', 'total_price', 'price0', 'price1', 'price2', 'price3', 'price4', 'price5', 'price6']
+        fields = ['id', 'title', 'total_price', 'total_count', 'price0', 'price1', 'price2', 'price3', 'price4', 'price5', 'price6']
