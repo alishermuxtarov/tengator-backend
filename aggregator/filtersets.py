@@ -11,8 +11,8 @@ class LotFilter(filters.FilterSet):
     hot_lots = filters.BooleanFilter(method='filter_hot_lots')
     start_price_from = filters.NumberFilter(field_name='start_price', lookup_expr='gte')
     start_price_to = filters.NumberFilter(field_name='start_price', lookup_expr='lte')
-    bid_date_from = filters.NumberFilter(field_name='bid_date', lookup_expr='gte')
-    bid_date_to = filters.NumberFilter(field_name='bid_date', lookup_expr='lte')
+    bid_date_from = filters.DateFilter(field_name='bid_date', lookup_expr='gte')
+    bid_date_to = filters.DateFilter(field_name='bid_date', lookup_expr='lte')
 
     def filter_q(self, qs, name, q):
         ids = FtsTengator.objects.search(q)
