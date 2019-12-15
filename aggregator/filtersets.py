@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from django.db.models import Case, When, Value, IntegerField
 from django_filters import rest_framework as filters
 
 from aggregator.models import Lot, FtsTengator
@@ -14,7 +15,11 @@ class LotFilter(filters.FilterSet):
     bid_date_to = filters.NumberFilter(field_name='bid_date', lookup_expr='lte')
 
     def filter_q(self, qs, name, q):
-        return qs.filter(pk__in=FtsTengator.objects.search(q))
+        ids = FtsTengator.objects.search(q)
+        ordering = [When(id=pk, then=Value(i)) for i, pk in enumerate(ids)]
+        return qs.filter(pk__in=ids).annotate(
+            order=Case(*ordering, output_field=IntegerField())
+        ).order_by('order')
 
     def filter_hot_lots(self, qs, name, q):
         return qs.filter(has_request=False, bid_date__lte=datetime.now() + timedelta(days=2))
