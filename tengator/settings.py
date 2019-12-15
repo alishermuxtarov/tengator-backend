@@ -148,7 +148,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, '../', 'static')
 
 AUTH_USER_MODEL = 'aggregator.User'
 
-TOKEN = ''
+TOKEN = '993158050:AAGaZ13H51T8Gq1miv0GjxxJHQWO2OngYjw'
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
