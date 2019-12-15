@@ -122,3 +122,20 @@ class AggregatorManager(models.Manager):
             lot_post_save.delay(obj.pk)
 
         return obj
+
+    def categories_report(self):
+        query = """
+            SELECT c.id, c.title, count(l.id) total_count, round(sum(start_price)) total_price,
+                   sum((CASE WHEN start_price BETWEEN 0 AND 5000000 THEN 1 ELSE 0 END)) price0,
+                   sum((CASE WHEN start_price BETWEEN 5000001 AND 10000000 THEN 1 ELSE 0 END)) price1,
+                   sum((CASE WHEN start_price BETWEEN 10000001 AND 30000000 THEN 1 ELSE 0 END)) price2,
+                   sum((CASE WHEN start_price BETWEEN 30000001 AND 50000000 THEN 1 ELSE 0 END)) price3,
+                   sum((CASE WHEN start_price BETWEEN 50000001 AND 70000000 THEN 1 ELSE 0 END)) price4,
+                   sum((CASE WHEN start_price BETWEEN 70000001 AND 100000000 THEN 1 ELSE 0 END)) price5,
+                   sum((CASE WHEN start_price > 100000001 THEN 1 ELSE 0 END)) price6
+            FROM aggregator_lot l
+            LEFT JOIN aggregator_category c on l.category_id = c.id
+            GROUP BY category_id
+            ORDER BY total_price DESC;
+        """
+        return self.raw(query)

@@ -55,3 +55,18 @@ class FilterDataSerializer(serializers.Serializer):
 
 class SuggestionSerializer(serializers.Serializer):
     title = serializers.CharField()
+
+
+class CategoryReportSerializer(serializers.ModelSerializer):
+    total_price = serializers.IntegerField()
+    price0 = serializers.IntegerField()
+    price1 = serializers.IntegerField()
+    price2 = serializers.IntegerField()
+    price3 = serializers.IntegerField()
+    price4 = serializers.IntegerField()
+    price5 = serializers.IntegerField()
+    price6 = serializers.IntegerField()
+
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'total_price', 'price0', 'price1', 'price2', 'price3', 'price4', 'price5', 'price6']

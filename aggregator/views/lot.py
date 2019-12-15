@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from aggregator.filtersets import LotFilter
 from aggregator.models import Lot, Region, Category, SubCategory
-from aggregator.serializers.lot import LotListSerializer, FilterDataSerializer
+from aggregator.serializers.lot import LotListSerializer, FilterDataSerializer, CategoryReportSerializer
 from aggregator.utils.pagination import StandardResultsSetPagination
 
 
@@ -62,3 +62,10 @@ class SuggestAPIView(APIView):
             ).annotate(order=Value(2)).values('title')
             results = [category.get('title') for category in categories.union(sub_categories)[:10]]
         return Response(results)
+
+
+class CategoriesReportAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    http_method_names = ['get']
+    serializer_class = CategoryReportSerializer
+    queryset = Lot.objects.categories_report()

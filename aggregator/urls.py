@@ -1,7 +1,8 @@
 from django.urls import path, include
 
 from aggregator.views.auth import LoginView, SignInView, ConfirmationView
-from aggregator.views.lot import LotListAPIView, FilterDataAPIView, LotDetailAPIView, SuggestAPIView
+from aggregator.views.lot import LotListAPIView, FilterDataAPIView, LotDetailAPIView, SuggestAPIView, \
+    CategoriesReportAPIView
 
 urlpatterns = [
     path('auth/', include([
@@ -14,5 +15,6 @@ urlpatterns = [
         path('lots/<int:pk>/', LotDetailAPIView.as_view(), name='lot-detail'),
         path('filter_data/', FilterDataAPIView.as_view(), name='filter-data'),
         path('suggest/', SuggestAPIView.as_view(), name='suggest'),
+    path('categories_report/', CategoriesReportAPIView.as_view(), name='categories-report'),
     ])),
 ]
