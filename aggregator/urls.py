@@ -9,7 +9,7 @@ urlpatterns = [
     ])),
     path('aggregator/', include({
         path('lots/', LotListAPIView.as_view(), name='lot-list'),
-        path('lots/<int:pk>/', LotDetailAPIView.as_view(), name='lot-list'),
+        path('lots/<int:pk>/', LotDetailAPIView.as_view(), name='lot-detail'),
         path('filter_data/', FilterDataAPIView.as_view(), name='filter-data'),
     })),
 ]

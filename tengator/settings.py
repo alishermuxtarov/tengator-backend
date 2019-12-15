@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'corsheaders',
     'rest_framework',
     'django_filters',
 
@@ -181,6 +182,7 @@ REST_FRAMEWORK = {
     'SEARCH_PARAM': 'q'
 }
 
+CORS_ORIGIN_ALLOW_ALL = True
 
 try:
     from .local_settings import *
