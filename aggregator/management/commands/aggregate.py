@@ -3,9 +3,13 @@ from datetime import date, timedelta
 from django.core.files.base import ContentFile
 from django.core.management import base
 
-from grab import Grab
+from grab import Grab, GrabError
 
 from aggregator import models, utils
+
+
+class Skip(Exception):
+    pass
 
 
 class Command(base.BaseCommand):
@@ -19,6 +23,15 @@ class Command(base.BaseCommand):
         self.area = {}
         self.category = {}
         self.subcategory = {}
+
+    def get(self, url):
+        try:
+            self.g.go(url)
+        except GrabError:
+            try:
+                self.g.go(url)
+            except Exception as msg:
+                raise Skip(msg)
 
     def load_area_and_region(self):
         for obj in models.Region.objects.all():
@@ -41,9 +54,12 @@ class Command(base.BaseCommand):
     def handle(self, *args, **options):
         self.load_area_and_region()
         for url, self.url in self.get_sites().items():
-            self.g = Grab()
-            self.g.go(url)
-            self.parse_bids()
+            try:
+                self.g = Grab()
+                self.get(url)
+                self.parse_bids()
+            except Skip:
+                continue
 
     def parse_bids(self):
         bids = self.g.doc.select('//tr')
@@ -52,9 +68,12 @@ class Command(base.BaseCommand):
             return
 
         for el in bids[1:]:
-            self.save_bid(
-                [e.text() for e in el.select('td')[1:8]]
-            )
+            try:
+                self.save_bid(
+                    [e.text() for e in el.select('td')[1:8]])
+            except Skip:
+                print('Skip')
+                continue
 
     def save_bid(self, bid):
         if '.' in bid[1]:
@@ -73,7 +92,7 @@ class Command(base.BaseCommand):
 
     def get_bid_info(self, bid_id):
         lot_url = self.url.format(bid_id)
-        self.g.go(lot_url)
+        self.get(lot_url)
         info = self.g.doc.select('//ul[@class="product_info"]')
         info = '\n'.join(e.text().strip() for e in info.select('li'))
         cond = self.g.doc.select('//ul[@class="conditionsList"]')
