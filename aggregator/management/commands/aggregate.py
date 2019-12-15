@@ -114,6 +114,7 @@ class Command(base.BaseCommand):
             files.append(ContentFile(self.g.doc.body, filename))
 
         if cat not in self.category:
+            print('Category "{}" not found'.format(cat))
             co = models.Category.objects.create(title=cat)
             self.category[cat] = co.pk
 

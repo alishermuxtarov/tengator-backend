@@ -20,8 +20,6 @@ def lot_post_save(pk):
         files=text
     )
 
-    # todo: fix me
-    return
     if settings.DEBUG is True:
         search_words(instance.pk)
     else:
