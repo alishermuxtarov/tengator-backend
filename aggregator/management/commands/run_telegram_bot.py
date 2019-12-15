@@ -4,13 +4,17 @@ from django.core.management import base
 from django.conf import settings
 
 import telebot
+from telebot.apihelper import ApiException
 
 from aggregator.models import User, SearchWord
 
 
 telebot.logger.setLevel(logging.INFO)
 bot = telebot.TeleBot(token=settings.TOKEN)
-bot.remove_webhook()
+try:
+    bot.remove_webhook()
+except ApiException:
+    pass
 
 
 def default_keyboard(obj, msg, reply=True):
