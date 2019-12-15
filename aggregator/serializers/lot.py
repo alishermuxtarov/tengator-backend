@@ -51,3 +51,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class FilterDataSerializer(serializers.Serializer):
     regions = RegionSerializer(many=True)
     categories = CategorySerializer(many=True)
+
+
+class SuggestionSerializer(serializers.Serializer):
+    title = serializers.CharField()
