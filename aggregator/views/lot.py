@@ -16,7 +16,11 @@ class LotListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     pagination_class = StandardResultsSetPagination
     filterset_class = LotFilter
-    queryset = Lot.objects.filter(bid_date__gte=datetime.now()).order_by('-id').select_related('region', 'area')
+    queryset = Lot.objects.filter(bid_date__gte=datetime.now()).select_related('region', 'area').order_by()
+
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        return queryset
 
 
 class LotDetailAPIView(ListAPIView):
