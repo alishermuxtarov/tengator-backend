@@ -1,5 +1,5 @@
 Django==2.2.8
-Pillow==6.2.1
+Pillow==9.0.1
 grab==0.6.41
 pyTelegramBotAPI==3.6.6
 celery[redis]==4.3.0
